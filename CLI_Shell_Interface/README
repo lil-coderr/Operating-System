@@ -1,0 +1,17 @@
+Name: Abdulaziz Issa
+SID: 1634894
+CCID: aissa1
+CMPUT 379 , fall 2023
+Assignement 1
+
+Included Files :
+    * Shell379.h
+    * shell379.cpp
+    * main.cpp
+    * Makefile
+    * README.txt
+
+Running Instructions :
+    The makefile that already exist in the repo can also be used to run the program or manual compile and build program. 
+    to build program run the makefile with: make all
+    and then make run 
