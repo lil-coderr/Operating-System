@@ -1,5 +1,5 @@
-#ifndef SHELL379_H
-#define SHELL379_H
+#ifndef Shell_H
+#define Shell_H
 
 #include <sys/wait.h>
 #include<iostream> 
@@ -27,7 +27,7 @@ struct process_info {
 };
 
 
-class Shell379{
+class Shell{
 
     public: 
         void run();
@@ -35,7 +35,7 @@ class Shell379{
 
     private: 
 
-        /*  Display the status of all running processes spawned by shell379. See
+        /*  Display the status of all running processes spawned by Shell. See
             the print format below in the example.*/ 
         void  jobs_cmd();
 

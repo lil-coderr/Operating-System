@@ -1,11 +1,11 @@
-#include "shell379.h"
+#include "Shell.h"
 
-void Shell379::run(){
+void Shell::run(){
 
     this->process_counter = 0; 
     //// keeps polling for commands to come to the shell
     while(1){
-        cout<<"SHELL379: ";
+        cout<<"Shell: ";
         //get comand from the user 
         string user_command ; 
         getline(cin, user_command); // reads full command line( until \n is found )
@@ -26,7 +26,7 @@ void Shell379::run(){
 
 }
     
-void Shell379::command_handler(vector<string> cmds,string user_cmd){
+void Shell::command_handler(vector<string> cmds,string user_cmd){
 
     string command = cmds[0];
     int second_arg;;
@@ -79,7 +79,7 @@ void Shell379::command_handler(vector<string> cmds,string user_cmd){
 
 };
 
-vector<string> Shell379::get_commands(string user_command){
+vector<string> Shell::get_commands(string user_command){
 
     vector<string> input_commands ; 
     // Check if the user_command is empty or consists of only whitespaces
@@ -98,7 +98,7 @@ vector<string> Shell379::get_commands(string user_command){
     return input_commands;
 };
 
-void Shell379::jobs_cmd(){
+void Shell::jobs_cmd(){
     // Variables to store user and system time
     struct rusage usage;
     getrusage(RUSAGE_SELF, &usage); // get resource usage for the shell itself
@@ -133,7 +133,7 @@ void Shell379::jobs_cmd(){
 
 }
 
-void Shell379::kill_cmd(const int pid){
+void Shell::kill_cmd(const int pid){
 
     //check if the specified pid is in the pcb 
     if (this->process_control_block.find(pid) == this->process_control_block.end()) {
@@ -155,7 +155,7 @@ void Shell379::kill_cmd(const int pid){
     }
 }
 
-void Shell379::suspend_cmd(const int pid){
+void Shell::suspend_cmd(const int pid){
 
     //check if the specified pid is in the pcb 
     if (this->process_control_block.find(pid) == this->process_control_block.end()) {
@@ -178,7 +178,7 @@ void Shell379::suspend_cmd(const int pid){
 
 };
 
-void Shell379::resume_cmd(const int pid){
+void Shell::resume_cmd(const int pid){
 
     //check if the specified pid is in the pcb 
     if (this->process_control_block.find(pid) == this->process_control_block.end()) {
@@ -199,7 +199,7 @@ void Shell379::resume_cmd(const int pid){
 
 };
 
-void Shell379::sleep_cmd(const int seconds){
+void Shell::sleep_cmd(const int seconds){
 
     if (seconds < 0) {
         cout << "Error: Invalid sleep time provided.\n";
@@ -207,10 +207,10 @@ void Shell379::sleep_cmd(const int seconds){
     }
 
     sleep(seconds);
-    cout<<"SHELL379: ";
+    cout<<"Shell: ";
 }
 
-void Shell379::wait_cmd(const int pid){
+void Shell::wait_cmd(const int pid){
 
     //check if the specified pid is in the pcb 
     if (this->process_control_block.find(pid) == this->process_control_block.end()) {
@@ -233,7 +233,7 @@ void Shell379::wait_cmd(const int pid){
 
 }
 
-void Shell379::special_args_handler(bool &redirectInput, bool &redirectOutput, vector<string> &parsed_input,
+void Shell::special_args_handler(bool &redirectInput, bool &redirectOutput, vector<string> &parsed_input,
                                     string &inputFileName, string &outputFileName){
 
  // Parse the command for redirection
@@ -254,7 +254,7 @@ void Shell379::special_args_handler(bool &redirectInput, bool &redirectOutput, v
 
 };
 
-void Shell379::execute_cmd(vector<string> parsed_input,const string user_command ){
+void Shell::execute_cmd(vector<string> parsed_input,const string user_command ){
 
     // Decide if it's a background process based on the last argument
     bool isBackground = false;
