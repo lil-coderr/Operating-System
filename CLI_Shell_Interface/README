@@ -1,17 +1,45 @@
-Name: Abdulaziz Issa
-SID: 1634894
-CCID: aissa1
-CMPUT 379 , fall 2023
-Assignement 1
+# A Simple CLI Shell Implementation
 
-Included Files :
-    * Shell379.h
-    * shell379.cpp
+## Description
+Shell is a minimal CLI shell designed to help understand systems programming, especially concepts like running multiple processes, resource management, and process communication in a Unix/Linux environment.
+
+## Specifications
+Shell will accept and execute a set of specified commands and provide features to manage processes. Some commands accept an integer parameter `<pid>` or `<int>`.
+
+### Commands
+1. `exit`: Terminate Shell ensuring all spawned processes are complete, printing total user and system time.
+   
+2. `jobs`: Display the status of all processes spawned by Shell.
+
+3. `kill <pid>`: Terminate process with ID `<pid>`.
+
+4. `resume <pid>`: Resume a suspended process with ID `<pid>`.
+
+5. `sleep <int>`: The shell sleeps for `<int>` seconds.
+
+6. `suspend <pid>`: Suspend process with ID `<pid>`.
+   
+7. `wait <pid>`: Wait until the process with ID `<pid>` completes.
+   
+8. `<cmd> <arg>*`: Execute `<cmd>` with 0 or more arguments `<arg>`. 
+
+   - Special Argument Options:
+     - `&`: Execute in the background if it's the last argument.
+     - `<fname`: Use `fname` as input file.
+     - `>fname`: Use `fname` as output file.
+
+**Note**: Refer to the detailed assignment for examples and specific use-case scenarios.
+
+### Included Files :
+    * Shell.h
+    * Shell.cpp
     * main.cpp
     * Makefile
     * README.txt
 
-Running Instructions :
+### Running Instructions :
     The makefile that already exist in the repo can also be used to run the program or manual compile and build program. 
     to build program run the makefile with: make all
     and then make run 
+
+
