@@ -73,6 +73,7 @@ void* prod_routine(void* args){
             } else {
                 cerr << "Error: Sleep duration must be between 1 and 100." << endl;
             }
+            
         } else {
             cerr << "Error: Invalid command." << endl;
         }

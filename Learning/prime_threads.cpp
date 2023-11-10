@@ -87,7 +87,7 @@ void* findPrime(void* args){
 void* print_to_file(void* args){
 
     pthread_mutex_lock(&mutex);
-    if( buffer.size() < 4096){
+    if( buffer.size() < 1024){
     // allow other threads to run while condition is not true
         //printf("waiting to fill\n");
         pthread_cond_wait(&condprint, &mutex);
@@ -109,7 +109,7 @@ int main(){
 
     cout << "Enter the number of threads to use ?" << endl; 
 
-    int n; // number of threads
+    int n = 8; // number of threads
     cin >> n ; 
 
     // segment a & b using n 
@@ -121,9 +121,7 @@ int main(){
 
     pthread_t threads[n]; // number of threads
     //create 
-    int* args_find_prime = new int[2];
-
-
+    
     int lower = a;
     for(int i = 0 ; i<n ; i++){
 

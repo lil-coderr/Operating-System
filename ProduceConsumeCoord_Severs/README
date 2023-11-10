@@ -2,3 +2,15 @@ To emulate a producer as a server, accepting incoming transactions and adding th
 to be done. The consumers are each a thread looking for work from the server to execute. The
 assignment has several important goals, including exposing you to thread programming, shared
 memory, and synchronization.
+
+
+
+
+
+
+--maintain a queue
+-producer adding work to the queue and consumers removing work from it
+-The queue must be able to hold 2 x #consumers amount of work.
+
+-queue gets full, the producer has to wait until a piece of work is removed by a  consumer before continuing
+- When the work queue is empty, consumers have to wait until work gets added to the queue by the producer.
