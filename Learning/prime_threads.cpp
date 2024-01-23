@@ -5,40 +5,20 @@
 #include <fstream>
 #include <string>
 #include<unistd.h>
-#include <sys/wait.h>
-#include <stdio.h>
 #include <pthread.h>
 #include <queue>
 #include <ctime>
+#include <semaphore.h>
+#include <fcntl.h> // for file open
+
 using namespace std;
 
 
 //global buffer
 queue<int> buffer;
 
-pthread_mutex_t mutex;
-pthread_cond_t condprint;
-
-
-void write_buf_tofile() {
-    // Open the file for writing
-    ofstream outFile("output.txt");
-    
-    // Check if the file is open
-    if (!outFile.is_open()) {
-        cerr << "Failed to open output.txt for writing." << endl;
-        return;
-    }
-    
-    // Write each integer from the queue to the file
-    while (!buffer.empty()) {
-        outFile << buffer.front() << " ," ;  // Write the integer followed by a newline
-        buffer.pop();  // Remove the integer from the queue
-    }
-    outFile<<endl;
-    // Close the file
-    outFile.close();
-}
+//pthread_cond_t condprint;
+sem_t mySemphore; 
 
 bool isPrime(int num){
 
@@ -65,39 +45,24 @@ void* findPrime(void* args){
 
     //iterate and check range
     for(int i = range_start ; i <=range_end ; i++ ){
-
         if ( isPrime(i)){
-            //copy to buffer 
+            
+            //add to buffer 
+            sem_wait(&mySemphore);
             ///// critical section 
-            pthread_mutex_lock(&mutex);
             //printf("found prime \n");
-            buffer.push(i);
-            pthread_mutex_unlock(&mutex);
+            cout << i << "  " ;
             //send signal to writing thread(which is the one waiting)
-            pthread_cond_signal(&condprint);
+            //pthread_cond_signal(&condprint);
+            sem_post(&mySemphore); //bufFull signal that buf may be full
+        }   
+    } 
 
-        }
-
-    }
+    sem_wait(&mySemphore);
+        cout << endl; 
+    sem_post(&mySemphore);
 
     delete[] args; 
-
-}
-
-void* print_to_file(void* args){
-
-    pthread_mutex_lock(&mutex);
-    if( buffer.size() < 1024){
-    // allow other threads to run while condition is not true
-        //printf("waiting to fill\n");
-        pthread_cond_wait(&condprint, &mutex);
-    } else {
-       // printf("printing\n");
-        write_buf_tofile();
-    }
-    
-    //● When it returns the mutex will be locked and owned by that thread
-    pthread_mutex_unlock(&mutex);
 
 }
 
@@ -107,33 +72,27 @@ int main(){
     int a = 1; 
     int b = 400000; 
 
-    cout << "Enter the number of threads to use ?" << endl; 
+    // cout << "Enter the number of threads to use ?" << endl; 
 
     int n = 8; // number of threads
-    cin >> n ; 
+    //cin >> n ; 
 
     // segment a & b using n 
     int segments = b/n ; // gets the integer part only 
 
-    pthread_mutex_init(&mutex,NULL);
-    pthread_cond_init(&condprint,NULL);
-    
+    int outFile = open("prime_thread_output.txt" , O_WRONLY | O_CREAT | O_TRUNC, 0644);
 
+    dup2(outFile, STDOUT_FILENO);
+
+    //pthread_mutex_init(&mutex,NULL);
+    //pthread_cond_init(&condprint,NULL);
+
+    sem_init(&mySemphore , 0 ,1);
     pthread_t threads[n]; // number of threads
-    //create 
-    
+
     int lower = a;
     for(int i = 0 ; i<n ; i++){
 
-
-        if(i == 0 ){
-            //printing thread
-            if( pthread_create(&threads[i],NULL, print_to_file, NULL) != 0){
-                perror("failed to create threads");
-            }
-
-        }else{
-            //rest are computing threads
             int upper = lower + segments;
             if( upper > b ) {
                 upper = b;
@@ -146,7 +105,7 @@ int main(){
 
             pthread_create(&threads[i], NULL , &findPrime ,  (void*)args_find_prime) ; 
             lower = upper + 1;
-        }
+        
 
     }
 
@@ -156,11 +115,16 @@ int main(){
         pthread_join(threads[i] , NULL); 
     }
 
-    pthread_mutex_destroy(&mutex);
-    pthread_cond_destroy(&condprint);
+    //pthread_mutex_destroy(&mutex);
+    //pthread_cond_destroy(&condprint);
 
-    write_buf_tofile();
+   // write_buf_tofile();
+    fflush(stdout);
 
+    dup2(outFile, STDOUT_FILENO);
+    fflush(stdout);
+
+    close(outFile);
     clock_t end = clock();
     double elapsed = 1000.0 * (end - start) / CLOCKS_PER_SEC;
     cout << "Time taken: " << elapsed << " ms" << endl;

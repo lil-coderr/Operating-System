@@ -17,8 +17,10 @@ chrono::high_resolution_clock::time_point startTime;
 queue<int> bounded_buffer; //{T5,T6,1}  1 means work in buffer and MAXSIZE = 2*nConsumers
 
 pthread_mutex_t queueMutex = PTHREAD_MUTEX_INITIALIZER;
-sem_t semEmpty;
-sem_t semFull;
+// sem_t semEmpty;
+// sem_t semFull;
+pthread_cond_t cond_buffer_NotFull = PTHREAD_COND_INITIALIZER;
+pthread_cond_t cond_buffer_NotEmpty = PTHREAD_COND_INITIALIZER;
 
 void logTime() {
     // Get the current time as the end time
@@ -42,21 +44,19 @@ void* prod_routine(void* args){
 
 
 
-            while(bounded_buffer.size() >  Maxsize){
-                //just wait until when the buffer is greater that maxsize
-            }
-
-
-            // Add to the buffer
-            sem_wait(&semEmpty);
             pthread_mutex_lock(&queueMutex);
+            while(bounded_buffer.size() ==  Maxsize){
+                //just wait until when the buffer is greater that maxsize
+                pthread_cond_wait(&cond_buffer_NotFull, &queueMutex );
+            }
             
+            // Add to the buffer          
             bounded_buffer.push(work); 
-
+            pthread_cond_broadcast(&cond_buffer_NotEmpty);
             logTime();
             cout << "ID= 0 Q= " << bounded_buffer.size() << " Work      " << work << endl;
             pthread_mutex_unlock(&queueMutex);
-            sem_post(&semFull);
+            
 
 
         } 
@@ -73,7 +73,6 @@ void* prod_routine(void* args){
             } else {
                 cerr << "Error: Sleep duration must be between 1 and 100." << endl;
             }
-            
         } else {
             cerr << "Error: Invalid command." << endl;
         }
@@ -82,6 +81,7 @@ void* prod_routine(void* args){
     logTime();
     cout << "ID= 0      END "<< endl;
     DONE = true;
+    
 }
 
 /*
@@ -93,29 +93,36 @@ void* cons_routine(void* args){
 
     int Thread_id = *((int*)args+0);
     int MaxSize = *((int*)args+1);
-
+   
     while(!DONE){
-
-        // Remove from the buffer
-        logTime();
-        cout << "ID= " << Thread_id << "      Ask" << endl;
-        sem_wait(&semFull);
+        
 
         pthread_mutex_lock(&queueMutex);
+        logTime();
+        cout << "ID= " << Thread_id << "      Ask" << endl;
+        while(bounded_buffer.size() ==  0){
+            //just wait until when the buffer is greater 0
+            pthread_cond_wait(&cond_buffer_NotEmpty, &queueMutex );
 
+
+        }
+           // Remove from the buffer
         int n = bounded_buffer.front();  
         bounded_buffer.pop() ; 
 
         logTime();
         cout << "ID= " << Thread_id << " Q= " << bounded_buffer.size() << " Receive   " << n << endl;
-
+        pthread_cond_broadcast(&cond_buffer_NotFull);
         pthread_mutex_unlock(&queueMutex);
-        sem_post(&semEmpty);
+        
 
         Trans(n); 
         logTime();
         cout << "ID= " << Thread_id << "      Complete  " << n << endl;
+
+        
     } 
+
     delete[] args; 
 }
 
@@ -152,8 +159,8 @@ int main(int argc , char* argv[]) {
     //to make easier to write to file and not require to implement an I/O buffer write file use STDOUT
     dup2(logFile , STDOUT_FILENO);
 
-    sem_init(&semEmpty, 0, nConsumers*2);
-    sem_init(&semFull, 0, 0);
+    // sem_init(&semEmpty, 0, nConsumers*2);
+    // sem_init(&semFull, 0, 0);
 
     pthread_t threads[nConsumers +1];
     //create n consumer and 1 producer
